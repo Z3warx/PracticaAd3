@@ -15,7 +15,7 @@ then
 			cat "$2" | tr -d '\r' | while read name password fullname
 			do
 			#Distinto de vacio
-			if [ ! -z "$name" && ! -z "$password" && ! -z "$fullname" ]
+			if [[ ! -z "$name" && ! -z "$password" && ! -z "$fullname" ]]
 			then
 				#Si el usuario existe entonces exists=1 si no exists=0
 				grep -q "^$name:" /etc/passwd && exists=1 || exists=0
@@ -55,23 +55,5 @@ else
 	echo "Este script necesita privilegios de administracion"
 	exit 1
 fi
-
-
-
-
-#Si el usuario ya existe muestra el mensaje exists sino false
-
-
-useradd -c "nombreCompleto" nombre
-chpasswd name:password
-
-
-#En teoria hace que la contrasena caduca en 30 dias
-passwd -x 30 as
-
-useradd usuario
-echo "usuario:contrasena" | chpasswd
-
-
 
 IFS=$oldIFS
