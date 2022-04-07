@@ -1,3 +1,0 @@
-cuenta1,1,juan
-cuenta2,2,pepe
-cuenta3,3,manolo
