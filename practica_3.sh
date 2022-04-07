@@ -12,7 +12,7 @@ then
 	#Hacemos que el usuario 'as' pueda hacer sudo sin contrasena
 	echo "\nas ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 	#Cambiamos el UID_MIN del archivo login.defs para que sea como minimo 1815
-	sed -i "/^UID_MIN/c UID_MIN        1815" /etc/login.defs
+	#sed -i "/^UID_MIN/c UID_MIN        1815" /etc/login.defs
 	#Comprobar el numero de parametros que sea correcto(igual a 2)
 	if [ $# -eq 2 ]
 	then
@@ -28,9 +28,9 @@ then
 				grep -q "^$name:" /etc/passwd && exists=1 || exists=0
 				if [ $exists -eq 0 ]
 				then	
-					useradd -c "$fullname" -m -d "/home/$name" "$name"
+					useradd -c "$fullname" -m -k /etc/skel -U -K UID_MIN=1815 -d "/home/$name" "$name"
 					#Copiamos los archivos de /etc/skel al directorio home
-					cp -r /etc/skel /home/$name
+					#cp -r /etc/skel /home/$name
 					#Con esto cambiamos la contrasena del usuario
 					echo "$name:$password" | chpasswd
 					#Cambiamos la caducidad de la contrasena a 30 dias
@@ -56,21 +56,21 @@ then
 			#Creamos el archivo .tar
 			tar -cf $name.tar /home/$name > /dev/null 2>&1
 			#Comprobamos que el .tar se ha realizado correctamente
-			if [ $? -eq 0 ]
-			then
+			#if [ $? -eq 0 ]
+			#then
 				#movemos el archivo .tar al directorio /extra/backup
 				mv $name.tar /extra/backup
 				#Comprobamos que el backup se ha realizado correctamente
-				if [ $? -eq 0 ]
-				then
+				#if [ $? -eq 0 ]
+				#then
 					#Borramos el usuario y ademas eliminamos el posible mensaje de que el usuario no existe
 					userdel -r "$name" > /dev/null 2>&1
-				fi
-			fi
+				#fi
+			#fi
 			done
 		#Opcion invalida
 		else
-			echo "Opcion invalida" >2
+			echo "Opcion invalida"
 		fi
 	else
 		echo "Numero incorrecto de parametros"
