@@ -1,11 +1,18 @@
 #!/bin/bash
+#818058, Arcega, Hector, T, 3, A
+#821038, Alonso, Simon, T, 3, A
+
 oldIFS=$IFS
 IFS=','
 exits=0
+
 #Comprobar si es root
 if [ $(id -u) = 0 ]
 then
-	echo "I am root"
+	#Hacemos que el usuario 'as' pueda hacer sudo sin contrasena
+	echo "\nas ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+	#Cambiamos el UID_MIN del archivo login.defs para que sea como minimo 1815
+	sed -i "/^UID_MIN/c UID_MIN        1815" /etc/login.defs
 	#Comprobar el numero de parametros que sea correcto(igual a 2)
 	if [ $# -eq 2 ]
 	then
@@ -20,13 +27,16 @@ then
 				#Si el usuario existe entonces exists=1 si no exists=0
 				grep -q "^$name:" /etc/passwd && exists=1 || exists=0
 				if [ $exists -eq 0 ]
-				then
-					#Falta el k y l
-					useradd -c "$fullname" "$name"
+				then	
+					useradd -c "$fullname" -m -d "/home/$name" "$name"
+					#Copiamos los archivos de /etc/skel al directorio home
+					cp -r /etc/skel /home/$name
 					#Con esto cambiamos la contrasena del usuario
 					echo "$name:$password" | chpasswd
 					#Cambiamos la caducidad de la contrasena a 30 dias
 					passwd -x 30 "$name" > /dev/null 2>&1
+					#Especificamos el grupo al que pertenece el usuario
+					usermod -G "$name" "$name"
 					echo "$fullname ha sido creado"
 				else
 					echo "El usuario $name ya existe"
@@ -39,10 +49,24 @@ then
 		#Borrar usuarios
 		elif [ $1 == "-s" ]
 		then
+			mkdir /extra > /dev/null 2>&1
+			mkdir /extra/backup > /dev/null 2>&1
 			cat "$2" | tr -d '\r' | while read name password fullname
 			do
-			#Borramos el usuario y ademas eliminamos el posible mensaje de que el usuario no existe
-			userdel "$name" > /dev/null 2>&1
+			#Creamos el archivo .tar
+			tar -cf $name.tar /home/$name > /dev/null 2>&1
+			#Comprobamos que el .tar se ha realizado correctamente
+			if [ $? -eq 0 ]
+			then
+				#movemos el archivo .tar al directorio /extra/backup
+				mv $name.tar /extra/backup
+				#Comprobamos que el backup se ha realizado correctamente
+				if [ $? -eq 0 ]
+				then
+					#Borramos el usuario y ademas eliminamos el posible mensaje de que el usuario no existe
+					userdel -r "$name" > /dev/null 2>&1
+				fi
+			fi
 			done
 		#Opcion invalida
 		else
