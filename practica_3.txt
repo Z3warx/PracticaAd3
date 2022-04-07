@@ -1,0 +1,11 @@
+818058, Arcega, Hector, T, 3, A
+821038, Alonso, Simon, T, 3, A
+
+En primer lugar hemos usado el comando cat "$2" | tr -d '\r' | while read name password fullname, con "tr -d \r" para que no coja los saltos de línea del fichero 
+en el que estan los datos de los usuarios. 
+Al añadir a un usuario, con los parámetros de useradd nos encargamos de crear los archivos de su home y de establecer el UID_MIN a 1815.
+Para realizar eficazmente la asiganción de contraseña, hemos ejecutado echo unido a chpasswd por una tubería ("echo "$name:$password" | chpasswd").
+En ciertos comandos como "passwd -x 30 "$name" > /dev/null 2>&1" hemos decidido redirigir la salida que da el comando para que no se muestre por pantalla 
+ningún mensaje no deseado.
+Para borrar directamente el directorio home de un usuario, usamos: "userdel -r "$name" > /dev/null 2>&1", de esta manera, con -r elminamos automaticamente 
+su directorio home.
