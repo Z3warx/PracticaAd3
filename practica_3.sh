@@ -9,8 +9,6 @@ exits=0
 #Comprobar si es root
 if [ $(id -u) = 0 ]
 then
-	#Hacemos que el usuario 'as' pueda hacer sudo sin contrasena
-	#echo "as ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 	#Comprobar el numero de parametros que sea correcto(igual a 2)
 	if [ $# -eq 2 ]
 	then
